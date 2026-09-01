@@ -5,11 +5,29 @@
 
     if ($_SERVER ['REQUEST_METHOD']== 'POST'){
         $title =$_POST['title'];
-        $image ="example.jpg";
+        
         $description=$_POST ['description'];
-        $category_id= 1;
+        $category_id= $_POST['category_id'];
         $user_id = 1;
+        $imageArray = $_FILES['image'];
+        var_dump($imageArray);
+        // die();
 
+        if(isset($imageArray) && $imageArray['size'] > 0){
+            $dir = '../images/';
+
+            echo $dir;
+            echo "<br>";
+            $imageDir = $dir.$imageArray['name']; // folderထဲ ကို တကယ်သိမ်းမည့် 
+            // echo $imageDir;
+            $image = 'images'.$imageArray['name']; // Database ထဲ သိမ်းမည့်name 
+            echo $image;
+            $tmpName = $imageArray['tmp_name'];
+
+            move_uploaded_file ($tmpName, $imageDir);
+
+        }
+            // die();
         $sql ="INSERT INTO posts (title, image, description,category_id, user_id) VALUES(:title, :image, :description,:category_id, :user_id)";
 
         $stmt = $conn->prepare($sql);
@@ -24,6 +42,13 @@
 
     }
     include '../layouts/nav_sidebar.php';
+
+    $sql ="SELECT * FROM categories";
+    $stmt = $conn-> prepare($sql);
+    $stmt-> execute();
+    $categories = $stmt -> fetchAll();
+    // var_dump($categories);
+
 ?>
 
     <div class="container-fluid px-4">
@@ -56,9 +81,13 @@
                             <select class="form-select" id="category_id" name="category_id" aria-label="Default select example">
                                 <option selected>Choose....</option>
                                 
-                                    <option value="">Web Development </option>
-                                    <option value="">Web Design </option>
-                                    <option value="">Web Server </option>
+                                <?php 
+                                foreach($categories as $category) {                            
+                                ?>    
+                                <option value="<?= $category['id']?>"><?= $category['name'];?></option>
+                                <?php
+                                }
+                                ?>
 
                                 
                             </select>
